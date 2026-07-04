@@ -1,0 +1,248 @@
+library(sjPlot)
+library(rstudioapi)
+library(modelsummary)
+library(haven)
+library(dplyr)
+library(plyr)
+library(psych)
+library(lavaan)
+library(car)
+library(lmtest)
+library(ggplot2)
+library(gmodels)
+library(gtsummary)
+library(gt)
+
+#Create SOCATT data set
+socatt <- select(p18229_bsa23_archive, DVsex23, Raceori4, RespAge_Archive, HEdQual2, LegMarStE, 
+                 PARTYFW, Politics, MiEcono, MiCultur, 
+                 ISSP_Q7_a_slice, ISSP_Q7_b_slice, ISSP_Q7_c_slice, ISSP_Q7_d_slice, ISSP_Q7_e_slice,
+                 ISSP_Q8, ISSP_Q9, ISSP_Q33, IntFreq_Archive, ISSP_Q34)
+
+#REMOVING NA
+socatt$DVsex23[socatt$DVsex23>=5] <- NA
+socatt$RespAge_Archive[socatt$RespAge_Archive>=998] <- NA
+socatt$Raceori4[socatt$Raceori4>=8] <- NA
+socatt$HEdQual2[socatt$HEdQual2>=9] <- NA
+socatt$PARTYFW[socatt$PARTYFW>=10] <- NA
+socatt$ISSP_Q7_a_slice[socatt$ISSP_Q7_a_slice>=6] <- NA
+socatt$ISSP_Q7_b_slice[socatt$ISSP_Q7_b_slice>=6] <- NA
+socatt$ISSP_Q7_c_slice[socatt$ISSP_Q7_c_slice>=6] <- NA
+socatt$ISSP_Q7_d_slice[socatt$ISSP_Q7_d_slice>=6] <- NA
+socatt$ISSP_Q7_e_slice[socatt$ISSP_Q7_e_slice>=6] <- NA
+socatt$ISSP_Q8[socatt$ISSP_Q8>=8] <- NA
+socatt$IntFreq_Archive[socatt$IntFreq_Archive>=5] <- NA
+socatt$ISSP_Q33[socatt$ISSP_Q33>=8] <- NA
+socatt$ISSP_Q34[socatt$ISSP_Q34>=6] <- NA
+
+#AS FACTOR
+socatt$as_sex <- as_factor(socatt$DVsex23)
+socatt$age_as <- as_factor(socatt$RespAge_Archive)
+socatt$as_race<- as_factor(socatt$Raceori4)
+socatt$as_educat <- as_factor(socatt$HEdQual2)
+socatt$as_party <- as_factor(socatt$PARTYFW)
+socatt$as_Q7A <- as_factor(socatt$ISSP_Q7_a_slice)
+socatt$as_Q7B <- as_factor(socatt$ISSP_Q7_b_slice)
+socatt$as_Q7C <- as_factor(socatt$ISSP_Q7_c_slice)
+socatt$as_Q7D <- as_factor(socatt$ISSP_Q7_d_slice)
+socatt$as_Q7E <- as_factor(socatt$ISSP_Q7_e_slice)
+socatt$as_no.imm <- as_factor(socatt$ISSP_Q8)
+socatt$as_internet <- as_factor(socatt$IntFreq_Archive)
+socatt$as_mediafreq <- as_factor(socatt$ISSP_Q33)
+
+#RECODE IMMIGRANT VARIABLES
+socatt$a_Q7A <- revalue(socatt$as_Q7A, c("Agree strongly" = 5, 
+                                        "Agree" = 4,
+                                        "Neither agree nor disagree" = 3,
+                                        "Disagree" = 2,
+                                        "Disagree strongly" = 1,
+                                        "Not applicable" = NA,
+                                        "Refused" = NA,
+                                        "Don't know" = NA,
+                                        "Can't choose" = NA,
+                                        "Prefer not to answer" = NA))
+socatt$Q7A <- as.numeric(as.character(socatt$a_Q7A))
+
+socatt$a_Q7B <- revalue(socatt$as_Q7B, c("Agree strongly" = 1, 
+                                         "Agree" = 2,
+                                         "Neither agree nor disagree" = 3,
+                                         "Disagree" = 4,
+                                         "Disagree strongly" = 5,
+                                         "Not applicable" = NA,
+                                         "Refused" = NA,
+                                         "Don't know" = NA,
+                                         "Can't choose" = NA,
+                                         "Prefer not to answer" = NA))
+socatt$Q7B <- as.numeric(as.character(socatt$a_Q7B))
+
+socatt$a_Q7C <- revalue(socatt$as_Q7C, c("Agree strongly" = 5, 
+                                         "Agree" = 4,
+                                         "Neither agree nor disagree" = 3,
+                                         "Disagree" = 2,
+                                         "Disagree strongly" = 1,
+                                         "Not applicable" = NA,
+                                         "Refused" = NA,
+                                         "Don't know" = NA,
+                                         "Can't choose" = NA,
+                                         "Prefer not to answer" = NA))
+socatt$Q7C <- as.numeric(as.character(socatt$a_Q7C))
+
+socatt$a_Q7D <- revalue(socatt$as_Q7D, c("Agree strongly" = 1, 
+                                         "Agree" = 2,
+                                         "Neither agree nor disagree" = 3,
+                                         "Disagree" = 4,
+                                         "Disagree strongly" = 5,
+                                         "Not applicable" = NA,
+                                         "Refused" = NA,
+                                         "Don't know" = NA,
+                                         "Can't choose" = NA,
+                                         "Prefer not to answer" = NA))
+socatt$Q7D <- as.numeric(as.character(socatt$a_Q7D))
+
+socatt$a_Q7E <- revalue(socatt$as_Q7E, c("Agree strongly" = 5, 
+                                         "Agree" = 4,
+                                         "Neither agree nor disagree" = 3,
+                                         "Disagree" = 2,
+                                         "Disagree strongly" = 1,
+                                         "Not applicable" = NA,
+                                         "Refused" = NA,
+                                         "Don't know" = NA,
+                                         "Can't choose" = NA,
+                                         "Prefer not to answer" = NA))
+socatt$Q7E <- as.numeric(as.character(socatt$a_Q7E))
+
+socatt$ISSP <- rowMeans(socatt[,
+                        c("Q7A", "Q7B", "Q7C", "Q7D", "Q7E")],
+                 na.rm = TRUE)
+
+#Reordering other variables
+socatt$AgeGrp <- revalue(socatt$age_as,
+                         c("18-22" = "18-25",
+                           "23" ="18-25",
+                           "24" = "18-25",
+                           "25" = "18-25",
+                           "26" = "26-34",
+                           "27" = "26-34",
+                           "28" = "26-34",
+                           "29" = "26-34",
+                           "30" = "26-34",
+                           "31" = "26-34",
+                           "32" = "26-34",
+                           "33" = "26-34",
+                           "34" = "26-34",
+                           "35" = "35-50",
+                           "36" = "35-50",
+                           "37" = "35-50",
+                           "38" = "35-50",
+                           "39" = "35-50",
+                           "40" = "35-50",
+                           "41" = "35-50",
+                           "42" = "35-50",
+                           "43" = "35-50",
+                           "44" = "35-50",
+                           "45" = "35-50",
+                           "46" = "35-50",
+                           "47" = "35-50",
+                           "48" = "35-50",
+                           "49" = "35-50",
+                           "50" = "35-50",
+                           "51" = "51-69",
+                           "52" = "51-69",
+                           "53" = "51-69",
+                           "54" = "51-69",
+                           "55" = "51-69",
+                           "56" = "51-69",
+                           "57" = "51-69",
+                           "58" = "51-69",
+                           "59" = "51-69",
+                           "60" = "51-69",
+                           "61" = "51-69",
+                           "62" = "51-69",
+                           "63" = "51-69",
+                           "64" = "51-69",
+                           "65" = "51-69",
+                           "66" = "51-69",
+                           "67" = "51-69",
+                           "68" = "51-69",
+                           "69" = "51-69",
+                           "70" = "+70",
+                           "71" = "+70",
+                           "72" = "+70",
+                           "73" = "+70",
+                           "74" = "+70",
+                           "75" = "+70",
+                           "76" = "+70",
+                           "77" = "+70",
+                           "78" = "+70",
+                           "79" = "+70",
+                           "80 or more" = "+70"))
+
+socatt$as_internet <- revalue(socatt$as_internet, c("Refused" = NA,
+                                          "Don't know" = NA,
+                                          "Not applicable" = NA))
+socatt$internet <- as.numeric(as.character(socatt$as_internet))
+socatt$internet_n <- select(socatt, internet == "Several times a day", ""
+
+socatt$as_mediafreq <- revalue(socatt$as_mediafreq, c("Refused" = NA,
+                                                    "Don't know" = NA,
+                                                    "Not applicable" = NA))
+socatt$mediafreq <- as.numeric(as.character(socatt$as_mediafreq))
+
+socatt$as_educat <- revalue(socatt$as_educat, c("Degree or equivalent, and above" = "Degree",
+                                                "Other Higher Education, including Diplomas in Higher Education, HNC and HND" = "Other higher education",
+                                                "A-levels/SCE Highers including vocational level 3 or equivalent, and above" = "A-levels/SCE",
+                                                "Qualifications below A-levels, such as GCSE/O Level/Standard Grade, vocational level 2 or equivalent" = "Below A-level",
+                                                "No qualifications" = "None",
+                                                "Refused" = NA,
+                                                "Don't know" = NA,
+                                                "Prefer not to answer" = NA,
+                                                "Not applicable" = NA))
+
+socatt$as_party <- revalue(socatt$as_party, c("Liberal Democrat" = "Lib Dem",
+                                                "Scottish National Party" = "SNP",
+                                                "Plaid Cymru" = "Cymru",
+                                                "Green Party" = "Green",
+                                                "UK Independence Party (UKIP)" = "UKIP",
+                                                "Reform UK (previously known as Brexit party)" = "Reform",
+                                                "Other party (please say what)" = NA,
+                                                "Refused" = NA,
+                                                "Don't know" = NA,
+                                                "Prefer not to answer" = NA,
+                                                "None of the above" = NA,
+                                                "Not applicable" = NA))
+
+socatt$as_polmedia <- revalue(socatt$as_polmedia, c("Neither agree nor disagree" = "Neither",
+                                          "Not applicable" = NA))
+
+socatt$as_internet <- revalue(socatt$as_internet, c("Several times a day" = "Several",
+                                                      "Daily or almost every day" = "Daily",
+                                                      "At least weekly but not daily" = "Weekly",
+                                                      "Less than weekly/not used in last three months/no access to the internet" = "less than weekly",
+                                                      "Refused" = NA,
+                                                      "Don't know" = NA,
+                                                      "Prefer not to answer" = NA,
+                                                      "Not applicable" = NA))
+
+socatt$as_mediafreq <- revalue(socatt$as_mediafreq, c("Several times a day" = "Several",
+                                              "Once a day" = "Daily",
+                                              "5-6 days a week" = "5-6",
+                                              "3-4 days a week" = "3-4",
+                                              "1-2 days a week" = "1-2",
+                                              "Less than 1 day a week" = "less 1",
+                                              "Refused" = NA,
+                                              "Don't know" = NA,
+                                              "Prefer not to answer" = NA,
+                                              "Can't choose" = NA,
+                                              "Not applicable" = NA))
+
+
+
+#CROSS TABLES
+with(socatt, CrossTable(a_Q7A, as_race, prop.chisq = FALSE, format = c("SPSS"), na.rm=TRUE))
+
+#REGRESSION MODEL
+
+ind_model2 <- lm(ISSP ~ as_internet + as_party + as_sex + AgeGrp + as_race + as_educat, data=socatt)
+
+summary(ind_modelA)
+tab_model(ind_model2)
