@@ -1,0 +1,68 @@
+Classifications:
+DVsex23
+Sex: 
+1 Female
+2 Male
+
+RespAge_Archive
+Age: 
+18-80 or more
+
+Raceori4
+Ethnicity:
+1 Black origin
+2 Asian origin
+3 White origin
+4 Mixed origin
+5 Other origin
+
+Education:
+1 Degree or equivalent, and above 
+2 Other Higher Education, including Diplomas in higher education, HNC and HND 
+3 A-levels/SCE Highers including vocational level 3 or equivalent, and above
+4 Qualifications below A-levels, such as GCSE/O Level/Standard Grade, vocational level 2 or equivalent 
+5 Other qualification (Please say what)
+6 No qualifications
+
+PARTYFW
+Which political party would you vote for in a general election
+1 Conservative
+2 Labour
+3 Liberal Democrat
+4 Scottish National Party
+5 Plaid Cymru
+6 Green Party
+7 UK Independence Party (UKIP)
+8 Reform UK (previously known as Brexit party)
+9 ALBA
+
+Q7: Agreement with statement, 1 agree strongly and 5 disagree strongly: 
+ISSP_Q7_a_slice, Immigrants increase crime rates
+ISSP_Q7_b_slice, Immigrants are generally good for Britain's economy
+ISSP_Q7_c_slice, Immigrants take jobs away from people who were born in Britain 
+ISSP_Q7_d_slice, Immigrants improve British society by bringing new ideas and cultures
+ISSP_Q7_e_slice, People born in Britain should be given preference over immigrants when it comes to jobs, housing, or health care
+1 Agree strongly
+2 Agree
+3 Neither agree nor disagree
+4 Disagree
+5 Disagree strongly
+6 Can’t choose
+
+IntFreq_Archive
+On average, how often would you say you access the internet for personal use? (This could be for general web browsing, watching videos or going on social media sites)
+1 Several times a day
+2 Daily or almost every day
+3 At least weekly but not daily
+4 Less than weekly/not used in last three months/no access to the internet
+
+ISSP_Q33
+How often do you use the media, including television, newspapers, radio, and the internet, to get political news or information?
+1 Several times a day
+2 Once a day
+3 5-6 days a week
+4 3-4 days a week
+5 1-2 days a week
+6 Less than 1 day a week
+7 Never
+8 Can’t choose
